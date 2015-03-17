@@ -31,7 +31,11 @@ import itertools
 from numpy import array
 
 def read(file):
-	"""reads the data file into a list and converts them to integers"""
+	'''reads the data file into a list and converts them to integers
+	'file' path to a text file
+
+	Returns list of integers
+	'''
 	with open(file) as f:
 		# read all data into a list
 		strings = f.readlines()
@@ -41,6 +45,11 @@ def read(file):
 		return map(int, filter(None, strings))
 
 def peakdet(data, threshold):
+	'''A very simple peak detection,
+	it just returns the indices at which the values are above the threshold.
+
+	Returns list of indices
+	'''
 	indices = []
 	for i, x in enumerate(data):
 		if x > threshold:
@@ -50,6 +59,13 @@ def peakdet(data, threshold):
 
 
 def cluster(data, threshold):
+	'''A simple numbering clustering algorithm.
+	'data' should be a list of numbers, which should get clustered.
+	The 'threshold' is the biggest gap which can exist between elements
+	before they will be seperated into two clusters.
+	
+	Returns a list of lists with the original numbers, clustered.
+	'''
 	data.sort()
 	groups = [[data[0]]]
 
@@ -63,6 +79,12 @@ def cluster(data, threshold):
 
 
 def guishow(data, maxtab):
+	'''Plots the data and maxtab with matplotlib
+	'data' will be drawn as graph
+	'maxtab' will be scattered with red dots on the 'data' graph
+
+	Returns None
+	'''
 	from matplotlib.pyplot import plot, scatter, show
 	plot(data)
 	scatter(array(maxtab), [0] * len(maxtab), color='red')
