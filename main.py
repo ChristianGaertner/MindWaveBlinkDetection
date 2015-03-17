@@ -27,7 +27,6 @@ DEALINGS IN THE SOFTWARE.
 
 '''
 
-import itertools
 from numpy import array
 
 def read(file):
