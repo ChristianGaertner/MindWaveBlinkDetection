@@ -9,11 +9,16 @@ int * read(FILE *file, int *ddf, int size)
 
 	for (int i = 0; i < size; ++i)
 	{
-		if (i == 0)
+		// Skip first LINE!
+		if (i != 0)
 		{
-			fscanf(file, "%*d %*d %*d%*c");
+			fscanf(file, "%d", &value);
+			ddf[i] = value;
 		}
-		fscanf(file, "%1d", &ddf[i]);
+		else
+		{
+			fscanf(file, "%*[^\n]\n", NULL);
+		}
 	}
 
 	fclose(file);
