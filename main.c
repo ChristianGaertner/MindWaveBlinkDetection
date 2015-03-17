@@ -2,12 +2,12 @@
 
 static int const LINES = 20000;
 
-int * read(FILE *file, int *ddf, int size)
+int * read(FILE *file, int *ddf)
 {
 	int i = 0;
 	int value;
 
-	for (int i = 0; i < size; ++i)
+	for (int i = 0; i < LINES; ++i)
 	{
 		// Skip first LINE!
 		if (i != 0)
@@ -26,12 +26,29 @@ int * read(FILE *file, int *ddf, int size)
 	return ddf;
 }
 
+int[] peakdet(int *data, int threshold)
+{
+	int indices[LINES];
+
+	int indicesCounter = 0;
+	for (int i = 0; i < LINES; ++i)
+	{
+		if (data[i] > threshold)
+		{
+			indices[indicesCounter] = i;
+			indicesCounter++;
+		}
+	}
+
+	return indices;
+}
+
 int main()
 {
 	FILE *file = fopen("data/data0.txt", "r");   
 
 	int ddf[LINES];
-	read(file, ddf, LINES);
+	read(file, ddf);
 
 	for (int i = 0; i < 200; ++i)
 	{
