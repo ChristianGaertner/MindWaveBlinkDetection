@@ -48,11 +48,24 @@ def peakdet(data, threshold):
 
 	return indices
 
+
+def cluster(data, threshold):
+	data.sort()
+	groups = [[data[0]]]
+
+	for x in data[1:]:
+		if abs(x - groups[-1][-1]) <= threshold:
+			groups[-1].append(x)
+		else:
+			groups.append([x])
+
+	return groups
+
+
 def guishow(data, maxtab):
 	from matplotlib.pyplot import plot, scatter, show
 	plot(data)
 	scatter(array(maxtab), [0] * len(maxtab), color='red')
-	
 	show()
 
 def main():
@@ -62,9 +75,18 @@ def main():
 
 	maxtab = peakdet(ddf, 500)
 
-	print maxtab
+	maxtab = cluster(maxtab, 100)
 
-	# guishow(ddf, maxtab)
+	peaks = []
+
+	for g in maxtab:
+		peaks.append(reduce(lambda x, y: x + y, g) / len(g))
+
+
+	print 'Found ' + `len(peaks)` + ' peaks'
+	print peaks
+
+	guishow(ddf, peaks)
 	
 
 
