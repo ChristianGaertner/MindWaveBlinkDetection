@@ -66,7 +66,7 @@ def cluster(data, threshold):
 	
 	Returns a list of lists with the original numbers, clustered.
 	'''
-	data.sort()
+	#data.sort()
 	groups = [[data[0]]]
 
 	for x in data[1:]:
