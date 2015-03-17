@@ -48,10 +48,5 @@ int main()
 	int ddf[LINES];
 	read(file, ddf);
 
-	for (int i = 0; i < 200; ++i)
-	{
-		printf("%d\n", ddf[i]);
-	}
-
 	return 0;
 }
