@@ -26,10 +26,8 @@ int * read(FILE *file, int *ddf)
 	return ddf;
 }
 
-int[] peakdet(int *data, int threshold)
+int * peakdet(int *data, int threshold, int *indices)
 {
-	int indices[LINES];
-
 	int indicesCounter = 0;
 	for (int i = 0; i < LINES; ++i)
 	{
