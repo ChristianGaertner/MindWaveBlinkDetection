@@ -27,6 +27,9 @@ DEALINGS IN THE SOFTWARE.
 
 '''
 
+import itertools
+from numpy import array
+
 def read(file):
 	"""reads the data file into a list and converts them to integers"""
 	with open(file) as f:
@@ -37,9 +40,35 @@ def read(file):
 		# convert to integers, but remove empty strings first
 		return map(int, filter(None, strings))
 
+def peakdet(data, threshold):
+	indices = []
+	for i, x in enumerate(data):
+		if x > threshold:
+			indices.append(i)
+
+	return indices
+
+def guishow(data, maxtab):
+	from matplotlib.pyplot import plot, scatter, show
+	plot(data)
+	scatter(array(maxtab), [0] * len(maxtab), color='red')
+	
+	show()
 
 def main():
-	print read('data/data0.txt')
+	ddf = read('data/data0.txt')
+	# backticks are for string + int concatenation
+	print 'Analyzing ' + `len(ddf)` + ' elements'
+
+	maxtab = peakdet(ddf, 500)
+
+	print maxtab
+
+	# guishow(ddf, maxtab)
+	
+
+
+
 
 
 if __name__ == "__main__":
