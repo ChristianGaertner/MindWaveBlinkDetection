@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 '''
 
 from numpy import array
+import sys
 
 def read(file):
 	'''reads the data file into a list and converts them to integers
@@ -107,7 +108,8 @@ def main():
 	print 'Found ' + `len(peaks)` + ' peaks'
 	print peaks
 
-	guishow(ddf, peaks)
+	if len(sys.argv) > 1 and sys.argv[1].strip() == 'gui':
+		guishow(ddf, peaks)
 	
 
 
