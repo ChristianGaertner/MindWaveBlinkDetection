@@ -1,6 +1,8 @@
 #include <stdio.h>
 
 static int const LINES = 20000;
+static int const MAX_CLUSTERS = 50;
+static int const PEAK_DET_THRESHOLD = 500;
 
 int * read(FILE *file, int *ddf)
 {
@@ -46,7 +48,15 @@ int main()
 	FILE *file = fopen("data/data0.txt", "r");   
 
 	int ddf[LINES];
+	int indices[LINES];
+
 	read(file, ddf);
+	peakdet(ddf, PEAK_DET_THRESHOLD, indices);
+
+	for (int i = 0; i < LINES; ++i)
+	{
+		printf("%d\n", indices[i]);
+	}
 
 	return 0;
 }
