@@ -2,6 +2,8 @@
 
 Analyse raw mindwave curves.
 
+Takes about 7ms per datapoint, or about 0.14s for a dataset of 20 000 datapoints
+
 MIT License
 ===========
 
