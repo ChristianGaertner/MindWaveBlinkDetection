@@ -42,6 +42,12 @@ def read(file):
 		# remove title from list
 		del strings[0]
 		# convert to integers, but remove empty strings first
+		'''
+		TODO: see if the filter is really needed, since there should
+		be no empty data strings
+		With a dataset of 20 000 lines the filter method takes appr. 0.002 seconds
+		longer...
+		'''
 		return map(int, filter(None, strings))
 
 def peakdet(data, threshold):
