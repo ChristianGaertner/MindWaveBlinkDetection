@@ -97,7 +97,11 @@ def guishow(data, maxtab):
 	show()
 
 def main():
-	ddf = read('data/data0.txt')
+	path = 'data/data0.txt'
+	if len(sys.argv) > 1:
+		path = sys.argv[1]
+
+	ddf = read(path)
 	# backticks are for string + int concatenation
 	print 'Analyzing ' + `len(ddf)` + ' elements'
 
@@ -114,7 +118,7 @@ def main():
 	print 'Found ' + `len(peaks)` + ' peaks'
 	print peaks
 
-	if len(sys.argv) > 1 and sys.argv[1].strip() == 'gui':
+	if len(sys.argv) > 2 and sys.argv[2].strip() == 'gui':
 		guishow(ddf, peaks)
 	
 
