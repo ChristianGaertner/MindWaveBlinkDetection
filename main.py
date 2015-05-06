@@ -147,7 +147,7 @@ def peakdet(data, threshold, mindist=30):
 
 
 def lowPassFilter(data):
-    cutoff = 2.4
+    cutoff = 10.2
     fs = 100
     order = 6
 
@@ -213,7 +213,7 @@ def main():
 
     ddfC = lowPassFilter(ddf)
 
-    maxtab = peakdet(ddfC, 250)
+    maxtab = peakdet(ddfC, 200)
 
     maxtab = cluster(maxtab, 100)
 
@@ -223,7 +223,7 @@ def main():
         peaks.append(reduce(lambda x, y: x + y, g) / len(g))
 
 
-    # peaks = [p - 30 for p in peaks]
+    peaks = [p - 30 for p in peaks]
 
     print('Found ' + repr(len(peaks)) + ' peaks')
     print(peaks)
