@@ -60,16 +60,88 @@ def read(file):
 		'''
 		return map(int, filter(None, strings))
 
-def peakdet(data, threshold):
+
+def peakdet(data, threshold, mindist=30):
 	'''A very simple peak detection,
 	it just returns the indices at which the values are above the threshold.
 
 	Returns list of indices
 	'''
+
+	m_threshold = threshold
+	l_threshold = 0.7 * threshold
+
 	indices = []
+	tmp_det = []
+
+	# phase of peak detection
+	# Valid phases are:
+	# 0: idle
+	# 1: first peak detected
+	# 2: first peak detected, waiting for second peak
+	# 3: seconds peak detected 
+	peak_det = 0
+
+	# counts how long we've been waiting for the next maxima/minima
+	in_peak = 0
+
+	# Stores the sign of the first peak
+	positive_start = True
+
+	# Cycle through all the data,
+	# i is the index, and x the value
 	for i, x in enumerate(data):
-		if abs(x) > threshold:
-			indices.append(i)
+
+		# This is the peak detection, if the value is greater
+		# than the threshold we register a peak (for now)
+		if abs(x) > threshold and peak_det is not -1:
+			if peak_det == 0:
+				# we found a new peak
+				peak_det = 1
+				
+				# store for later, if we started with a positive or negative peak
+				positive_start = x > 0
+
+			# this means after the zero crossing we found the next connected peak
+			elif peak_det != 1:
+				# but if the sign of the peak is still the same, means that we had
+				# not crossed the 0, thus not a peak we were after.
+				if (x > 0 and positive_start) or (x < 0 and not positive_start):
+					print("lost(" + repr(peak_det) + "):")
+					print("\t" + repr(tmp_det))
+					print("\ti=" + repr(i) + ",x=" + repr(x) + ",p_s=" + repr(positive_start))
+					peak_det = -1
+				else:
+					peak_det = 3
+			
+			tmp_det.append(i)
+		elif peak_det == 1:
+			# We just leaved the peak zone, switch to waiting
+			peak_det = 2
+		elif peak_det == 2:
+			# We lower the threshold here, since we are expecting a peak, but only
+			# if the sign of the value has changed
+			if (x < 0 and positive_start) or (x > 0 and not positive_start):
+				threshold = l_threshold
+
+			# Waiting for the next peak, count upwards
+			in_peak += 1
+			if in_peak > mindist:
+				# Max wait time for next peak exceeded. Reset
+				peak_det = -1
+				tmp_det = []
+		elif peak_det == 3:
+			# We just left the seconds peak zone. A complete peak has been detected.
+			# Append the indicies to the main list and reset
+			peak_det = -1
+			indices.extend(tmp_det)
+		else:
+			# reset everything
+			in_peak = 0
+			peak_det = 0
+			threshold = m_threshold
+			positive_start = True
+			tmp_det = []
 
 	return indices
 
@@ -111,22 +183,26 @@ def guishow(data, maxtab, altplot=None):
 
 	Returns None
 	'''
-	from matplotlib.pyplot import plot, scatter, show
+	from matplotlib.pyplot import plot, scatter, show, vlines
+
 	plot(data)
 
 	if altplot is not None:
 		plot(altplot)
 
-	scatter(array(maxtab), [0] * len(maxtab), color='red')
+	scatter(array(maxtab), [0] * len(maxtab), color='red',s=50, zorder=3)
+	vlines(array(maxtab), -1000, 1000, color='red', zorder=3)
+
 	show()
 
 def main():
 	path = 'data/data0.txt'
+
 	if len(sys.argv) > 1:
 		if sys.argv[1] == "--help":
 			print("main.py [path]|--help (gui)")
 			return
-
+		
 		path = sys.argv[1]
 
 	ddf = list(read(path))
@@ -135,7 +211,7 @@ def main():
 
 	ddfC = lowPassFilter(ddf)
 
-	maxtab = peakdet(ddfC, 300)
+	maxtab = peakdet(ddfC, 250)
 
 	maxtab = cluster(maxtab, 100)
 
@@ -145,7 +221,7 @@ def main():
 		peaks.append(reduce(lambda x, y: x + y, g) / len(g))
 
 
-	peaks = [p - 30 for p in peaks]
+	#peaks = [p - 30 for p in peaks]
 
 	print('Found ' + repr(len(peaks)) + ' peaks')
 	print(peaks)
