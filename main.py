@@ -29,12 +29,29 @@ DEALINGS IN THE SOFTWARE.
 
 '''
 
+from __future__ import print_function
+
 from functools import reduce
 import sys
 
 from numpy import array
 from scipy import signal
 
+def trace(*objs):
+    print_stderr("TRACE", *objs)
+
+def debug(*objs):
+    print_stderr("DEBUG", *objs)
+
+def info(*objs):
+    print_stderr("INFO", *objs)
+
+
+def warning(*objs):
+    print_stderr("WARN", *objs)
+
+def print_stderr(level, *objs):
+    print(level, ": ", *objs, file=sys.stderr)
 
 def read(file):
     """reads the data file into a list and converts them to integers
@@ -61,7 +78,7 @@ def read(file):
         return map(int, filter(None, strings))
 
 
-def peakdet(data, threshold, mindist=30):
+def peakdet(data, threshold, mindist=30, dynamic_threshold=0.7):
     """A very simple peak detection,
     it just returns the indices at which the values are above the threshold.
 
@@ -69,7 +86,7 @@ def peakdet(data, threshold, mindist=30):
     """
 
     m_threshold = threshold
-    l_threshold = 0.7 * threshold
+    l_threshold = dynamic_threshold * threshold
 
     indices = []
     tmp_det = []
@@ -96,6 +113,7 @@ def peakdet(data, threshold, mindist=30):
         # than the threshold we register a peak (for now)
         if abs(x) > threshold and peak_det is not -1:
             if peak_det == 0:
+                trace("first peak found (peak_det= 1;ps=", x > 0, ")")
                 # we found a new peak
                 peak_det = 1
 
@@ -107,9 +125,9 @@ def peakdet(data, threshold, mindist=30):
                 # but if the sign of the peak is still the same, means that we had
                 # not crossed the 0, thus not a peak we were after.
                 if (x > 0 and positive_start) or (x < 0 and not positive_start):
-                    print("lost(" + repr(peak_det) + "):")
-                    print("\t" + repr(tmp_det))
-                    print("\ti=" + repr(i) + ",x=" + repr(x) + ",p_s=" + repr(positive_start))
+                    debug("no peak to peak data(phase=", peak_det, "):")
+                    debug("\t", tmp_det)
+                    debug("\ti=", i, ",x=", x, ",p_s=", positive_start)
                     peak_det = -1
                 else:
                     peak_det = 3
@@ -117,6 +135,7 @@ def peakdet(data, threshold, mindist=30):
             tmp_det.append(i)
         elif peak_det == 1:
             # We just leaved the peak zone, switch to waiting
+            trace("peak zone left. waiting for re-entry")
             peak_det = 2
         elif peak_det == 2:
             # We lower the threshold here, since we are expecting a peak, but only
@@ -126,17 +145,21 @@ def peakdet(data, threshold, mindist=30):
 
             # Waiting for the next peak, count upwards
             in_peak += 1
+            trace("waiting for re-entry since", in_peak, "indices")
             if in_peak > mindist:
+                debug("re-entry window missed. aborting")
                 # Max wait time for next peak exceeded. Reset
                 peak_det = -1
                 tmp_det = []
         elif peak_det == 3:
+            debug("peak fully detected. resetting")
             # We just left the seconds peak zone. A complete peak has been detected.
             # Append the indicies to the main list and reset
             peak_det = -1
             indices.extend(tmp_det)
         else:
             # reset everything
+            trace("resetting everything.")
             in_peak = 0
             peak_det = 0
             threshold = m_threshold
