@@ -145,9 +145,9 @@ def peakdet(data, threshold, mindist=30, dynamic_threshold=0.7):
 
             # Waiting for the next peak, count upwards
             in_peak += 1
-            trace("waiting for re-entry since", in_peak, "indices")
+            trace("waiting for re-entry since", in_peak, "indices @ i =", i)
             if in_peak > mindist:
-                debug("re-entry window missed. aborting")
+                debug("re-entry window missed. aborting @ i =", i)
                 # Max wait time for next peak exceeded. Reset
                 peak_det = -1
                 tmp_det = []
@@ -219,6 +219,10 @@ def guishow(data, maxtab, altplot=None):
 
     show()
 
+def print_peaks(peaks):
+    print("PEAKS")
+    for p in peaks:
+        print(int(p))
 
 def main():
     path = 'data/data0.txt'
@@ -232,7 +236,7 @@ def main():
 
     ddf = list(read(path))
 
-    print('Analyzing ' + repr(len(ddf)) + ' elements')
+    info('Analyzing ' + repr(len(ddf)) + ' elements')
 
     ddfC = lowPassFilter(ddf)
 
@@ -248,8 +252,9 @@ def main():
 
     peaks = [p - 30 for p in peaks]
 
-    print('Found ' + repr(len(peaks)) + ' peaks')
-    print(peaks)
+    info('Found ' + repr(len(peaks)) + ' peaks')
+
+    print_peaks(peaks)
 
     if len(sys.argv) > 2 and sys.argv[2].strip() == 'gui':
         guishow(ddf, peaks, ddfC)
