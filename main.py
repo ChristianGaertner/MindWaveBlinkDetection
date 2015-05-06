@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 
 '''
 
+from functools import reduce
 from numpy import array
 import sys
 
@@ -44,6 +45,10 @@ def read(file):
 		# remove title from list
 		del strings[0]
 		# convert to integers, but remove empty strings first
+
+		for string in strings:
+			string = string.split('.', 1)
+
 		'''
 		TODO: see if the filter is really needed, since there should
 		be no empty data strings
@@ -58,6 +63,7 @@ def peakdet(data, threshold):
 
 	Returns list of indices
 	'''
+	#data = smooth(data)
 	indices = []
 	for i, x in enumerate(data):
 		if x > threshold:
@@ -101,15 +107,19 @@ def guishow(data, maxtab):
 def main():
 	path = 'data/data0.txt'
 	if len(sys.argv) > 1:
+		if sys.argv[1] == "--help":
+			print("main.py [path]|--help (gui)")
+			return
+
 		path = sys.argv[1]
 
-	ddf = read(path)
-	# backticks are for string + int concatenation
-	print 'Analyzing ' + `len(ddf)` + ' elements'
+	ddf = list(read(path))
 
-	maxtab = peakdet(ddf, 500)
+	print('Analyzing ' + repr(len(ddf)) + ' elements')
 
-	maxtab = cluster(maxtab, 100)
+	maxtab = peakdet(ddf, 300)
+
+	maxtab = cluster(maxtab, 50)
 
 	peaks = []
 
@@ -117,8 +127,8 @@ def main():
 		peaks.append(reduce(lambda x, y: x + y, g) / len(g))
 
 
-	print 'Found ' + `len(peaks)` + ' peaks'
-	print peaks
+	print('Found ' + repr(len(peaks)) + ' peaks')
+	print(peaks)
 
 	if len(sys.argv) > 2 and sys.argv[2].strip() == 'gui':
 		guishow(ddf, peaks)
