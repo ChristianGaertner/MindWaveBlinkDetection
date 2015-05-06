@@ -44,11 +44,11 @@ def read(file):
 		strings = f.readlines()
 		# remove title from list
 		del strings[0]
+		
+		# convert x.000 to just x
+		strings = [s.split('.')[0] for s in strings]
+
 		# convert to integers, but remove empty strings first
-
-		for string in strings:
-			string = string.split('.', 1)
-
 		'''
 		TODO: see if the filter is really needed, since there should
 		be no empty data strings
