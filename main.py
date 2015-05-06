@@ -31,6 +31,9 @@ DEALINGS IN THE SOFTWARE.
 
 from functools import reduce
 from numpy import array
+from scipy import signal
+
+import numpy as np
 import sys
 
 def read(file):
@@ -63,14 +66,23 @@ def peakdet(data, threshold):
 
 	Returns list of indices
 	'''
-	#data = smooth(data)
 	indices = []
 	for i, x in enumerate(data):
-		if x > threshold:
+		if abs(x) > threshold:
 			indices.append(i)
 
 	return indices
 
+
+def lowPassFilter(data):
+	cutoff = 2.4
+	fs = 100
+	order = 6
+
+	nyq = 0.5 * fs
+	normal_cutoff = cutoff / nyq
+	b, a = signal.butter(order, normal_cutoff, btype='low', analog=False)
+	return signal.lfilter(b, a, data)
 
 def cluster(data, threshold):
 	'''A simple numbering clustering algorithm.
@@ -92,7 +104,7 @@ def cluster(data, threshold):
 	return groups
 
 
-def guishow(data, maxtab):
+def guishow(data, maxtab, altplot=None):
 	'''Plots the data and maxtab with matplotlib
 	'data' will be drawn as graph
 	'maxtab' will be scattered with red dots on the 'data' graph
@@ -101,6 +113,10 @@ def guishow(data, maxtab):
 	'''
 	from matplotlib.pyplot import plot, scatter, show
 	plot(data)
+
+	if altplot is not None:
+		plot(altplot)
+
 	scatter(array(maxtab), [0] * len(maxtab), color='red')
 	show()
 
@@ -117,9 +133,11 @@ def main():
 
 	print('Analyzing ' + repr(len(ddf)) + ' elements')
 
-	maxtab = peakdet(ddf, 300)
+	ddfC = lowPassFilter(ddf)
 
-	maxtab = cluster(maxtab, 50)
+	maxtab = peakdet(ddfC, 300)
+
+	maxtab = cluster(maxtab, 100)
 
 	peaks = []
 
@@ -127,11 +145,13 @@ def main():
 		peaks.append(reduce(lambda x, y: x + y, g) / len(g))
 
 
+	peaks = [p - 30 for p in peaks]
+
 	print('Found ' + repr(len(peaks)) + ' peaks')
 	print(peaks)
 
 	if len(sys.argv) > 2 and sys.argv[2].strip() == 'gui':
-		guishow(ddf, peaks)
+		guishow(ddf, peaks, ddfC)
 	
 
 
